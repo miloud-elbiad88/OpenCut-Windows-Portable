@@ -1,0 +1,44 @@
+{
+	"name": "opencut-desktop",
+	"productName": "OpenCut",
+	"version": "0.3.0",
+	"description": "OpenCut Video Editor Desktop",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"build:portable": "bun scripts/stage-runtime.mjs && electron-builder --win portable --x64",
+		"dist": "bun run build:portable"
+	},
+	"build": {
+		"appId": "com.opencut.desktop",
+		"productName": "OpenCut",
+		"asar": false,
+		"directories": {
+			"output": "dist-portable"
+		},
+		"files": [
+			"main.js",
+			"server/**/*",
+			"!node_modules/**/*"
+		],
+		"win": {
+			"target": [
+				"nsis"
+			]
+		},
+		"nsis": {
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true,
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true,
+			"shortcutName": "OpenCut Video Editor"
+		},
+		"electronFuses": {
+			"runAsNode": true
+		}
+	},
+	"devDependencies": {
+		"electron": "^45.2.2",
+		"electron-builder": "^26.18.0"
+	}
+}
