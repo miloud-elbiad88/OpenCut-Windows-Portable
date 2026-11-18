@@ -22,6 +22,15 @@ export function frameRateToFloat(rate: FrameRate): number {
 	return rate.numerator / rate.denominator;
 }
 
+export function formatFrameRate(rate: FrameRate): string {
+	const value = frameRateToFloat(rate);
+	if (!Number.isFinite(value) || value <= 0) return "Unknown";
+	if (Math.abs(value - Math.round(value)) < 0.01) {
+		return `${Math.round(value)} fps`;
+	}
+	return `${value.toFixed(2)} fps`;
+}
+
 export function frameRatesEqual(a: FrameRate, b: FrameRate): boolean {
 	return a.numerator === b.numerator && a.denominator === b.denominator;
 }

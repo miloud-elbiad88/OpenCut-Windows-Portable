@@ -1,8 +1,23 @@
 import { describe, expect, test } from "bun:test";
 import {
+	formatFrameRate,
 	getHighestImportedVideoFps,
 	getRaisedProjectFpsForImportedMedia,
 } from "@/lib/fps/utils";
+
+describe("formatFrameRate", () => {
+	test("formats whole frame rates without object coercion", () => {
+		expect(formatFrameRate({ numerator: 30, denominator: 1 })).toBe("30 fps");
+	});
+
+	test("formats fractional frame rates to two decimals", () => {
+		expect(formatFrameRate({ numerator: 30000, denominator: 1001 })).toBe("29.97 fps");
+	});
+
+	test("returns a safe fallback for invalid frame rates", () => {
+		expect(formatFrameRate({ numerator: 0, denominator: 0 })).toBe("Unknown");
+	});
+});
 
 describe("getHighestImportedVideoFps", () => {
 	test("returns the highest valid video fps", () => {

@@ -4,6 +4,8 @@ type SaveManagerOptions = {
 	debounceMs?: number;
 };
 
+export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
+
 export class SaveManager {
 	private debounceMs: number;
 	private isPaused = false;
@@ -11,6 +13,8 @@ export class SaveManager {
 	private hasPendingSave = false;
 	private saveTimer: ReturnType<typeof setTimeout> | null = null;
 	private unsubscribeHandlers: Array<() => void> = [];
+	private status: SaveStatus = "saved";
+	private statusListeners = new Set<(status: SaveStatus) => void>();
 
 	constructor(
 		private editor: EditorCore,
@@ -54,6 +58,7 @@ export class SaveManager {
 	markDirty({ force = false }: { force?: boolean } = {}): void {
 		if (this.isPaused && !force) return;
 		this.hasPendingSave = true;
+		this.setStatus("unsaved");
 		this.queueSave();
 	}
 
@@ -64,6 +69,16 @@ export class SaveManager {
 
 	getIsDirty(): boolean {
 		return this.hasPendingSave || this.isSaving;
+	}
+
+	getStatus(): SaveStatus {
+		return this.status;
+	}
+
+	subscribeStatus(listener: (status: SaveStatus) => void): () => void {
+		this.statusListeners.add(listener);
+		listener(this.status);
+		return () => this.statusListeners.delete(listener);
 	}
 
 	private queueSave(): void {
@@ -88,15 +103,29 @@ export class SaveManager {
 		this.isSaving = true;
 		this.hasPendingSave = false;
 		this.clearTimer();
+		this.setStatus("saving");
 
 		try {
-			await this.editor.project.saveCurrentProject();
+			const saved = await this.editor.project.saveCurrentProject();
+			this.setStatus(saved ? "saved" : "error");
+			if (!saved) {
+				this.hasPendingSave = true;
+			}
+		} catch {
+			this.hasPendingSave = true;
+			this.setStatus("error");
 		} finally {
 			this.isSaving = false;
 			if (this.hasPendingSave) {
 				this.queueSave();
 			}
 		}
+	}
+
+	private setStatus(status: SaveStatus): void {
+		if (this.status === status) return;
+		this.status = status;
+		this.statusListeners.forEach((listener) => listener(status));
 	}
 
 	private clearTimer(): void {

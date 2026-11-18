@@ -182,8 +182,8 @@ export class ProjectManager {
 		}
 	}
 
-	async saveCurrentProject(): Promise<void> {
-		if (!this.active) return;
+	async saveCurrentProject(): Promise<boolean> {
+		if (!this.active) return false;
 
 		try {
 			const scenes = this.editor.scenes.getScenes();
@@ -200,8 +200,10 @@ export class ProjectManager {
 			await storageService.saveProject({ project: updatedProject });
 			this.active = updatedProject;
 			this.updateMetadata(updatedProject);
+			return true;
 		} catch (error) {
 			console.error("Failed to save project:", error);
+			return false;
 		}
 	}
 

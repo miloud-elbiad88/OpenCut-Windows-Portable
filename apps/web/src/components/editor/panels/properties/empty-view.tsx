@@ -7,6 +7,7 @@ import { ProjectInfoDialog } from "@/components/editor/dialogs/project-info-dial
 import { RenameProjectDialog } from "@/components/editor/dialogs/rename-project-dialog";
 import { toast } from "sonner";
 import { formatTimecode, mediaTimeToSeconds } from "opencut-wasm";
+import { formatFrameRate } from "@/lib/fps/utils";
 
 function DetailRow({
 	label,
@@ -43,7 +44,7 @@ export function EmptyView() {
 		: 1;
 
 	const projectName = activeProject?.metadata.name || "Untitled Project";
-	const fps = activeProject?.settings.fps || 30;
+	const fps = activeProject?.settings.fps;
 	const durationSeconds = mediaTimeToSeconds({ time: totalDuration });
 	const durationFormatted =
 		totalDuration > 0
@@ -87,7 +88,10 @@ export function EmptyView() {
 
 				<DetailRow label="Aspect ratio:" value="16:9 (Original)" />
 				<DetailRow label="Resolution:" value="1920 × 1080 (Adapted)" />
-				<DetailRow label="Frame rate:" value={`${fps}.00fps`} />
+				<DetailRow
+					label="Frame rate:"
+					value={fps ? formatFrameRate(fps) : "Unknown"}
+				/>
 			</div>
 
 			{/* Bottom Modify Button */}
