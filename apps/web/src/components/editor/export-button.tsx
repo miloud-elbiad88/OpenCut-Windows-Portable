@@ -49,6 +49,7 @@ import { useEditor } from "@/hooks/use-editor";
 import { DEFAULT_EXPORT_OPTIONS } from "@/lib/export/defaults";
 import { toast } from "sonner";
 import type { FrameRate } from "opencut-wasm";
+import { formatFrameRate } from "@/lib/fps/utils";
 
 // Resolution Presets
 interface ResolutionPreset {
@@ -208,7 +209,7 @@ function ExportDialog({
 		setIsExportSuccess(false);
 
 		// Determine target resolution
-		let targetRes: { width: number; height: number } | undefined = undefined;
+		let targetRes: { width: number; height: number } | undefined;
 		if (activeResolutionPreset.id !== "original" && activeResolutionPreset.width > 0) {
 			targetRes = {
 				width: activeResolutionPreset.width,
@@ -268,8 +269,8 @@ function ExportDialog({
 
 	const effectiveFps =
 		activeFpsPreset.id === "project"
-			? `${activeProject?.settings.fps.numerator ?? 30} fps`
-			: `${activeFpsPreset.fps.numerator} fps`;
+			? formatFrameRate(activeProject?.settings.fps ?? FPS_PRESETS[0].fps)
+			: formatFrameRate(activeFpsPreset.fps);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>

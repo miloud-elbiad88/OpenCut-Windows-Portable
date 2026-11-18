@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "../ui/button";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -41,6 +41,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ShortcutsDialog } from "./dialogs/shortcuts-dialog";
 import Image from "next/image";
 import { cn } from "@/utils/ui";
+import type { SaveStatus } from "@/core/managers/save-manager";
 
 const CAPCUT_HEADER_TOOLS: { key: Tab; label: string; icon: any }[] = [
 	{ key: "media", label: "Media", icon: Folder03Icon },
@@ -55,6 +56,37 @@ const CAPCUT_HEADER_TOOLS: { key: Tab; label: string; icon: any }[] = [
 	{ key: "templates", label: "Templates", icon: Layout01Icon },
 	{ key: "avatar", label: "AI avatar", icon: UserSquareIcon },
 ];
+
+function SaveStatusIndicator() {
+	const editor = useEditor();
+	const [status, setStatus] = useState<SaveStatus>(editor.save.getStatus());
+
+	useEffect(() => editor.save.subscribeStatus(setStatus), [editor]);
+
+	const labels: Record<SaveStatus, string> = {
+		saved: "Saved",
+		saving: "Saving...",
+		unsaved: "Unsaved",
+		error: "Save failed",
+	};
+
+	const colors: Record<SaveStatus, string> = {
+		saved: "text-emerald-400",
+		saving: "text-cyan-400",
+		unsaved: "text-amber-400",
+		error: "text-red-400",
+	};
+
+	return (
+		<span
+			className={cn("ml-1 text-[10px] font-medium", colors[status])}
+			role="status"
+			aria-live="polite"
+		>
+			{labels[status]}
+		</span>
+	);
+}
 
 function CapCutToolsBar() {
 	const activeTab = useAssetsPanelStore((s) => s.activeTab);
@@ -102,6 +134,7 @@ export function EditorHeader() {
 			<div className="flex items-center gap-1 shrink-0">
 				<ProjectDropdown />
 				<EditableProjectName />
+				<SaveStatusIndicator />
 			</div>
 			<CapCutToolsBar />
 			<nav className="flex items-center gap-2 shrink-0">

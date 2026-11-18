@@ -1,7 +1,7 @@
 {
 	"name": "opencut-desktop",
 	"productName": "OpenCut",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "OpenCut Video Editor Desktop",
 	"main": "main.js",
 	"scripts": {
